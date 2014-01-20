@@ -1,0 +1,15 @@
+#!/usr/bin/python
+import daemon
+
+import os
+
+#from core.config import
+
+if not os.path.exists('/var/log/tvrobotd/'):
+    os.mkdir('/var/log/tvrobotd/')
+
+log_out = open('/var/log/tvrobotd/tvrobotd.log', 'a+')
+log_err = open('/var/log/tvrobotd/tvrobotd.err.log', 'a+')
+
+context = daemon.DaemonContext(stdout=log_out, stderr=log_err,  working_directory='.')
+context.open()
