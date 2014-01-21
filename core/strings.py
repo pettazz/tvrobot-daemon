@@ -9,7 +9,7 @@ STRINGS = {
 
         "twilio": {
             "error_generic": '<?xml version="1.0" encoding="UTF-8"?><Response><Sms>Something went wrong! Ow. Try again later.</Sms></Response>',
-        }
+        },
 
         "TVRobot": {
             "unrar": """

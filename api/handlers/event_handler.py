@@ -1,7 +1,7 @@
-from api.handlers.basehandler import BaseHandler
+from base_handler import BaseHandler
 import uuid
 
-class SMSHandler(BaseHandler):
+class EventHandler(BaseHandler):
 
     def post(self):
         conversation_id = self.get_secure_cookie('butl_conversation_id')

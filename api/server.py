@@ -5,7 +5,7 @@ import tornado.web
 import core.config as config
 from core.strings import STRINGS
 
-from core.tvrobot import TVRobot
+# from core.tvrobot import TVRobot
 
 from api.handlers.sms_handler import SMSHandler
 from api.handlers.event_handler import EventHandler
@@ -16,7 +16,7 @@ class TVRobotAPI(tornado.web.Application):
         self.logger = logging.getLogger(__name__)
 
         # tvrobot core object
-        self.tvrobot = TvRobot()
+        # self.tvrobot = TvRobot()
 
         # static handlers
         handlers = [
@@ -26,7 +26,7 @@ class TVRobotAPI(tornado.web.Application):
         # tornado app settings
         settings = dict(
             debug = True,
-            cookie_secret = config.TVROBOT.API['cookie_secret']
+            cookie_secret = config.TVROBOT['API']['cookie_secret']
         )
         # init app with settings and static handlers
         tornado.web.Application.__init__(self, handlers, **settings)
@@ -35,8 +35,8 @@ class TVRobotAPI(tornado.web.Application):
 
 def APIRunner():
     # create the API app and start listening
-    app = TVRobotAPI(logger)
-    app.listen(config.TVROBOT.API['host_port'])
+    app = TVRobotAPI()
+    app.listen(config.TVROBOT['API']['host_port'])
 
     # main ioloop
     main_loop = tornado.ioloop.IOLoop.instance()

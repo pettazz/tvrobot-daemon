@@ -1,4 +1,4 @@
-from api.handlers.basehandler import BaseHandler
+from base_handler import BaseHandler
 import uuid
 
 class SMSHandler(BaseHandler):
