@@ -1,40 +1,76 @@
 #!/usr/bin/python
-import daemon
-
-import os
+import os, sys
 import logging
 import time
+import signal
 
-# import core.config as config
+import daemon
+import daemon.runner
+
+import core.config as config
 
 from api.server import TVRobotAPI
 from api.server import APIRunner
 
-if not os.path.exists('/var/log/tvrobotd/'): #config.TVROBOT.log_path
-    os.mkdir('/var/log/tvrobotd/')
 
-logging.basicConfig(
-    level = logging.DEBUG,
-    format = '%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
-    datefmt = '%m-%d %H:%M:%S',
-    filename = '%s/tvrobotapi-%s.log' % (config.TVROBOT.log_path, str(int(time.time()))),
-    filemode = 'a'
-)
+# log path
+if not os.path.exists(config.TVROBOT['DAEMON']['log_path']):
+    os.mkdir(config.TVROBOT['DAEMON']['log_path'])
 
-console = logging.StreamHandler()
-console.setLevel(logging.INFO)
-logging.getLogger('').addHandler(console)
+# working directory
+if not os.path.exists(config.TVROBOT['DAEMON']['working_directory']):
+    os.mkdir(config.TVROBOT['DAEMON']['working_directory'])
+    stdin_file = config.TVROBOT['DAEMON']['working_directory'] + 'tvrobotd.stdin'
+    with open(stdin_file, 'a'):
+        os.utime(stdin_file, None)
 
-logger = logging.getLogger(__name__)
+class TVRobotDaemon():
 
-log_out = open('/var/log/tvrobotd/tvrobotd.log', 'a+')
-log_err = open('/var/log/tvrobotd/tvrobotd.err.log', 'a+')
+    stdout_path = config.TVROBOT['DAEMON']['log_path'] + 'tvrobotd.log'
+    stderr_path = config.TVROBOT['DAEMON']['log_path'] + 'tvrobotd.err.log'
+    stdin_path = config.TVROBOT['DAEMON']['working_directory'] + 'tvrobotd.stdin'
 
-context = daemon.DaemonContext(
-    stdout=log_out, 
-    stderr=log_err,  
-    working_directory='.'
-)
+    pidfile_path = '/var/run/tvrobotd.pid'
+    pidfile_timeout = 5
 
-with context:
-    APIRunner()
+    def run(self):
+        try:
+            import setproctitle
+            setproctitle.setproctitle('tvrobotd')
+        except:
+            pass 
+
+        logging.basicConfig(
+            level = logging.DEBUG,
+            format = '%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+            datefmt = '%m-%d %H:%M:%S',
+            filename = '%stvrobotapi-%s.log' % (config.TVROBOT['DAEMON']['log_path'], str(int(time.time()))),
+            filemode = 'a'
+        )
+
+        console = logging.StreamHandler()
+        console.setLevel(logging.INFO)
+        logging.getLogger('').addHandler(console)
+
+        logger = logging.getLogger(__name__)
+
+        # context = daemon.DaemonContext(
+        #     stdout = log_out, 
+        #     stderr = log_err,  
+        #     working_directory = config.TVROBOT['DAEMON']['working_directory'],
+        #     pidfile = pid_lock,
+        #     # signal_map = {
+        #     #     signal.SIGTERM: 'terminate',
+        #     #     signal.SIGTSTP: None,
+        #     #     signal.SIGTTOU: None,
+        #     #     signal.SIGTTIN: None
+        #     # }
+        # )
+
+        # with context:
+        APIRunner()
+
+
+daemon.runner.DaemonRunner(
+    TVRobotDaemon()
+).do_action()
