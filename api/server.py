@@ -1,4 +1,4 @@
-import logging, time
+import logging, time, os
 import tornado.ioloop
 import tornado.web
 
@@ -13,6 +13,17 @@ from api.handlers.event_handler import EventHandler
 class TVRobotAPI(tornado.web.Application):
     def __init__(self):
         # logging
+        logging.basicConfig(
+            level = logging.DEBUG,
+            format = '%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+            datefmt = '%m-%d %H:%M:%S',
+            filename = '%stvrobotd-api.log' % config.TVROBOT['DAEMON']['log_path'],
+            filemode = 'a'
+        )
+
+        console = logging.StreamHandler()
+        console.setLevel(logging.INFO)
+        logging.getLogger('').addHandler(console)
         self.logger = logging.getLogger(__name__)
 
         # tvrobot core object
@@ -25,13 +36,14 @@ class TVRobotAPI(tornado.web.Application):
         ]
         # tornado app settings
         settings = dict(
-            debug = True,
+            debug = False,
             cookie_secret = config.TVROBOT['API']['cookie_secret']
         )
         # init app with settings and static handlers
         tornado.web.Application.__init__(self, handlers, **settings)
 
         self.logger.info('Application initialized successfully')
+        self.logger.info(os.getpid())
 
 def APIRunner():
     # create the API app and start listening
