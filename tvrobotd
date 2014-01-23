@@ -71,7 +71,6 @@ class TVRobotDaemon():
             existing_pid = pidlockfile.read_pid_from_pidfile(self.pidfile_path)
             try:
                 os.kill(existing_pid, signal.SIGTERM)
-                pidlockfile.remove_existing_pidfile(self.pidfile_path)
                 self._msg('tvrobotd stopped')
             except OSError, e:
                 self._err_msg('unable to terminate tvrobotd, process %s: %s' % (existing_pid, e))
@@ -122,13 +121,11 @@ class TVRobotDaemon():
             stdout = open(self.stdout_path, 'a'), 
             stderr = open(self.stderr_path, 'a'),  
             working_directory = config.TVROBOT['DAEMON']['working_directory'],
-            # signal_map = {
-            #     signal.SIGTERM: 'terminate',
-            #     signal.SIGTSTP: None,
-            #     signal.SIGTTOU: None,
-            #     signal.SIGTTIN: None
-            # }
+            signal_map = {
+                signal.SIGTERM: 'end_server'
+            }
         )
+        context.end_server = self._stop_server
 
         with context:
             # create our pidfile lock, or die if we can't
@@ -139,6 +136,11 @@ class TVRobotDaemon():
 
             self._msg('tvrobotd initialized, process %s' % os.getpid())
             APIRunner()
+
+    def _stop_server(self, signal_number, stack_frame):
+        # any cleanup at shutdown
+        pidlockfile.remove_existing_pidfile(self.pidfile_path)
+        raise SystemExit(u"Terminating on signal %s" % signal_number)
 
 
 TVRobotDaemon()
