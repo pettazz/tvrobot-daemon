@@ -2,6 +2,7 @@
 import os, sys
 import signal, errno
 import logging
+import time
 from lockfile import pidlockfile
 
 import daemon
@@ -64,11 +65,21 @@ class TVRobotDaemon():
             self._run_server()
 
     def _stop(self):
-        pass
+        if not self._check_pid():
+            self._err_msg('tvrobotd is not running')
+        else:
+            existing_pid = pidlockfile.read_pid_from_pidfile(self.pidfile_path)
+            try:
+                os.kill(existing_pid, signal.SIGTERM)
+                pidlockfile.remove_existing_pidfile(self.pidfile_path)
+                self._msg('tvrobotd stopped')
+            except OSError, e:
+                self._err_msg('unable to terminate tvrobotd, process %s: %s' % (existing_pid, e))
 
     def _restart(self):
-        self.stop()
-        self.start()
+        self._stop()
+        time.sleep(1)
+        self._start()
 
     def _check_pid(self, acquire_lock = False):
         if os.path.exists(self.pidfile_path):
