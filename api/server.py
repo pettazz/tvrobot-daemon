@@ -42,8 +42,7 @@ class TVRobotAPI(tornado.web.Application):
         # init app with settings and static handlers
         tornado.web.Application.__init__(self, handlers, **settings)
 
-        self.logger.info('Application initialized successfully')
-        self.logger.info(os.getpid())
+        self.logger.info('API initialized successfully')
 
 def APIRunner():
     # create the API app and start listening
