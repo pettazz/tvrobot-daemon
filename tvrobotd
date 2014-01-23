@@ -1,11 +1,10 @@
 #!/usr/bin/python
 import os, sys
+import signal, errno
 import logging
-import time
-import signal
+from lockfile import pidlockfile
 
 import daemon
-import daemon.runner
 
 import core.config as config
 
@@ -20,57 +19,113 @@ if not os.path.exists(config.TVROBOT['DAEMON']['log_path']):
 # working directory
 if not os.path.exists(config.TVROBOT['DAEMON']['working_directory']):
     os.mkdir(config.TVROBOT['DAEMON']['working_directory'])
-    stdin_file = config.TVROBOT['DAEMON']['working_directory'] + 'tvrobotd.stdin'
-    with open(stdin_file, 'a'):
-        os.utime(stdin_file, None)
 
 class TVRobotDaemon():
 
-    stdout_path = config.TVROBOT['DAEMON']['log_path'] + 'tvrobotd.log'
-    stderr_path = config.TVROBOT['DAEMON']['log_path'] + 'tvrobotd.err.log'
-    stdin_path = config.TVROBOT['DAEMON']['working_directory'] + 'tvrobotd.stdin'
-
-    pidfile_path = '/var/run/tvrobotd.pid'
-    pidfile_timeout = 5
-
-    def run(self):
+    def __init__(self):
         try:
             import setproctitle
             setproctitle.setproctitle('tvrobotd')
         except:
             pass 
 
-        logging.basicConfig(
-            level = logging.DEBUG,
-            format = '%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
-            datefmt = '%m-%d %H:%M:%S',
-            filename = '%stvrobotapi-%s.log' % (config.TVROBOT['DAEMON']['log_path'], str(int(time.time()))),
-            filemode = 'a'
+        self.stdout_path = config.TVROBOT['DAEMON']['log_path'] + 'tvrobotd.log'
+        self.stderr_path = config.TVROBOT['DAEMON']['log_path'] + 'tvrobotd.err.log'
+
+        self.pidfile_path = '/var/run/tvrobotd.pid'
+
+        if not len(sys.argv) == 2:
+            self._err_msg('usage: tvrobotd start|stop|restart')
+        action = unicode(sys.argv[1])
+        if action not in [u'start', u'stop', u'restart']:
+            self._err_msg('unrecognized action. actions are: start|stop|restart')
+
+        if action == u'start':
+            self._start()
+        if action == u'stop':
+            self._stop()
+        if action == u'restart':
+            self._restart()
+
+    def _err_msg(self, message):
+        sys.stderr.write(message + '\n')
+        sys.stderr.flush()
+        sys.exit(2)
+
+    def _msg(self, message):
+        sys.stdout.write(message + '\n')
+        sys.stdout.flush()
+
+    def _start(self):
+        if self._check_pid():
+            self._err_msg('tvrobotd is already running')
+        else:
+            self._msg('starting tvrobotd...')
+            self._run_server()
+
+    def _stop(self):
+        pass
+
+    def _restart(self):
+        self.stop()
+        self.start()
+
+    def _check_pid(self, acquire_lock = False):
+        if os.path.exists(self.pidfile_path):
+            existing_pid = pidlockfile.read_pid_from_pidfile(self.pidfile_path)
+            try:
+                os.kill(existing_pid, signal.SIG_DFL)
+                if acquire_lock:
+                    self._err_msg('tvrobotd is already running, process %s' % existing_pid)
+                else:
+                    return True
+            except OSError, e:
+                if not e.errno == errno.ESRCH:
+                    if acquire_lock:
+                        pidlockfile.remove_existing_pidfile(self.pidfile_path)
+                        try:
+                            self.pidfile = pidlockfile.PIDLockFile(self.pidfile_path).acquire(.1) #aint nobody got time for that
+                            return True
+                        except Exception, e:
+                            self._err_msg('error creating pidfile lock: %s' % e)
+                else:
+                    if acquire_lock:
+                        self._err_msg('tvrobotd may already be running: %s' % e)
+                    else:
+                        return True
+        if acquire_lock:
+            try:
+                # https://github.com/smontanaro/pylockfile/issues/9
+                # acquire(0) is broken in the current pypi version
+                self.pidfile = pidlockfile.PIDLockFile(self.pidfile_path).acquire(.1) #aint nobody got time for that
+                return True
+            except Exception, e:
+                self._err_msg('error creating pidfile lock: %s' % e)
+        else:
+            return False
+
+    def _run_server(self):
+        context = daemon.DaemonContext(
+            stdout = open(self.stdout_path, 'a'), 
+            stderr = open(self.stderr_path, 'a'),  
+            working_directory = config.TVROBOT['DAEMON']['working_directory'],
+            # signal_map = {
+            #     signal.SIGTERM: 'terminate',
+            #     signal.SIGTSTP: None,
+            #     signal.SIGTTOU: None,
+            #     signal.SIGTTIN: None
+            # }
         )
 
-        console = logging.StreamHandler()
-        console.setLevel(logging.INFO)
-        logging.getLogger('').addHandler(console)
+        with context:
+            # create our pidfile lock, or die if we can't
+            try:
+                self._check_pid(acquire_lock = True)
+            except Exception, e: 
+                self._err_msg('error creating pidfile lock: %s' % e)
 
-        logger = logging.getLogger(__name__)
-
-        # context = daemon.DaemonContext(
-        #     stdout = log_out, 
-        #     stderr = log_err,  
-        #     working_directory = config.TVROBOT['DAEMON']['working_directory'],
-        #     pidfile = pid_lock,
-        #     # signal_map = {
-        #     #     signal.SIGTERM: 'terminate',
-        #     #     signal.SIGTSTP: None,
-        #     #     signal.SIGTTOU: None,
-        #     #     signal.SIGTTIN: None
-        #     # }
-        # )
-
-        # with context:
-        APIRunner()
+            self._msg('tvrobotd initialized, process %s' % os.getpid())
+            APIRunner()
 
 
-daemon.runner.DaemonRunner(
-    TVRobotDaemon()
-).do_action()
+TVRobotDaemon()
