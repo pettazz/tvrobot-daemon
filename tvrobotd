@@ -80,7 +80,7 @@ class TVRobotDaemon():
                 else:
                     return True
             except OSError, e:
-                if not e.errno == errno.ESRCH:
+                if e.errno == errno.ESRCH:
                     if acquire_lock:
                         pidlockfile.remove_existing_pidfile(self.pidfile_path)
                         try:
@@ -88,6 +88,8 @@ class TVRobotDaemon():
                             return True
                         except Exception, e:
                             self._err_msg('error creating pidfile lock: %s' % e)
+                    else:
+                        return False
                 else:
                     if acquire_lock:
                         self._err_msg('tvrobotd may already be running: %s' % e)
