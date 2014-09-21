@@ -1,7 +1,7 @@
 STRINGS = {
     "en_US": {
 
-        "API": {
+        "api": {
             "error_generic": 'Something went wrong!',
             "error_missing_event_handler": 'I don\'t seem to have a handler for the "%s" event.',
 
@@ -11,7 +11,7 @@ STRINGS = {
             "error_generic": '<?xml version="1.0" encoding="UTF-8"?><Response><Sms>Something went wrong! Ow. Try again later.</Sms></Response>',
         },
 
-        "TVRobot": {
+        "tvrobot": {
             "unrar": """
                      .-=-==--==--.
                ..-=="  ,'o`)      `.
@@ -91,3 +91,33 @@ STRINGS = {
 
     }
 }
+
+class StringCategory:
+
+    def __init__(self, category_name, string_dict):
+        self.category_name = category_name
+        self.strings = string_dict
+
+    def __str__(self):
+        return "[stringlist:" + self.category_name + "]"
+
+    def __getattr__(self, name):
+        if name in self.strings.keys():
+            return self.strings[name]
+        else:
+            return "[" + self.category_name + "." + name + "]"
+
+class Stringifier:
+
+    def __init__(self, lang_id = "en_US"):
+        self.lang_id = lang_id
+        self.categories = {}
+
+        for category in STRINGS[self.lang_id].keys():
+            self.categories[category] = StringCategory(category, STRINGS[self.lang_id][category])
+
+    def __getattr__(self, name):
+        if name in self.categories.keys():
+            return self.categories[name]
+        else:
+            return StringCategory(name, {})
