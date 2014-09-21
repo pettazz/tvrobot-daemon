@@ -102,10 +102,7 @@ class StringCategory:
         return "[stringlist:" + self.category_name + "]"
 
     def __getattr__(self, name):
-        if name in self.strings.keys():
-            return self.strings[name]
-        else:
-            return "[" + self.category_name + "." + name + "]"
+        return self.strings.get(name, "[" + self.category_name + "." + name + "]")
 
 class Stringifier:
 
@@ -117,7 +114,4 @@ class Stringifier:
             self.categories[category] = StringCategory(category, STRINGS[self.lang_id][category])
 
     def __getattr__(self, name):
-        if name in self.categories.keys():
-            return self.categories[name]
-        else:
-            return StringCategory(name, {})
+        return self.categories.get(name, StringCategory(name, {}))
