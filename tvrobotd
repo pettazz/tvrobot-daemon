@@ -1,7 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import os, sys
 import signal, errno
-import logging
 import time
 from lockfile import pidlockfile
 
@@ -25,8 +24,8 @@ class TVRobotDaemon():
         except:
             pass 
 
-        self.stdout_path = config.tvrobot['deamon']['log_path'] + 'tvrobotd.log'
-        self.stderr_path = config.tvrobot['deamon']['log_path'] + 'tvrobotd.err.log'
+        self.stdout_path = config.tvrobot['daemon']['log_path'] + 'tvrobotd-daemon.log'
+        self.stderr_path = config.tvrobot['daemon']['log_path'] + 'tvrobotd-daemon.err.log'
 
         self.pidfile_path = '/var/run/tvrobotd.pid'
 
