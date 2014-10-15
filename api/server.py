@@ -1,4 +1,4 @@
-import logging, time, os
+import time, os
 import tornado.ioloop
 import tornado.web
 
@@ -6,6 +6,7 @@ import core.config as config
 from core.strings import STRINGS
 
 # from core.tvrobot import TVRobot
+from core.logger import Logger
 
 from api.handlers.sms_handler import SMSHandler
 from api.handlers.event_handler import EventHandler
@@ -13,18 +14,7 @@ from api.handlers.event_handler import EventHandler
 class TVRobotAPI(tornado.web.Application):
     def __init__(self):
         # logging
-        logging.basicConfig(
-            level = logging.DEBUG,
-            format = '%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
-            datefmt = '%m-%d %H:%M:%S',
-            filename = '%stvrobotd-api.log' % config.TVROBOT['DAEMON']['log_path'],
-            filemode = 'a'
-        )
-
-        console = logging.StreamHandler()
-        console.setLevel(logging.INFO)
-        logging.getLogger('').addHandler(console)
-        self.logger = logging.getLogger(__name__)
+        self.logger = Logger.get_logger(__name__)
 
         # tvrobot core object
         # self.tvrobot = TvRobot()

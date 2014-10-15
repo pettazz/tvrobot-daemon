@@ -1,29 +1,33 @@
-class TVROBOT:
-    'log_path': 'logs',
+tvrobot = {
     'completed_move_method': 'LOCAL',
-    'torrent_ratio_threshold': 0.09,
+    'torrent_ratio_threshold': 0.49,
 
-    API = {
-        'cookie_secret': 'd4de3be272c5b457dd5fec769b51b2c3',
+    'daemon': {
+        'log_path': '/var/log/tvrobotd/',
+        'working_directory': '/etc/tvrobotd/'
+    },
+
+    'api': {
+        'cookie_secret': 'lol',
         'host_pattern': r'localhost',
         'host_port': '8888'
-    }
+    },
 
-    MEDIA = {
+    'media': {
         'server': '127.0.0.1',
         'port': 22,
         'user': 'tvrobot',
         'password': 'lol',
         'remote_path': {
-            'Movie': '/Ext4/Movies',
-            'Set': '/Ext4/Movies',
-            'Episode': '/Ext4/Tv.Shows',
-            'Season': '/Ext4/Tv.Shows',
-            'Series': '/Ext4/Tv.Shows',
+            'Movie': '/Movies',
+            'Set': '/Movies',
+            'Episode': '/TVShows',
+            'Season': '/TVShows',
+            'Series': '/TVShows',
         }
-    }
+    },
 
-    FILETYPES = {
+    'filetypes': {
         "video": (
             'mkv', 'avi', 'mp4', 'm2ts', 'm2s', '3gp', 'ts', 'm4v'
         ),
@@ -31,42 +35,40 @@ class TVROBOT:
             'zip', 'rar'
         )
     }
+}
 
-class TVRAGE:
-    'tz_offset': -3600,
-    'api_key': '967oJgtZnzEPUAYPbxWI'
+trakt = {
+    'api_key': 'bananahammock'
+}
 
-class TWILIO:
-    ACCOUNT = {
-        'ACCOUNT_SID': 'ACfbd69e8db8aa5bb80c5a57cbb678edd4',
-        'AUTH_TOKEN': '74b0f7c80ae21f3feb5ad476bcbb6c8b',
-        'phone_number': '+14195176268'
-    }
+twilio = {
+    'account': {
+        'ACCOUNT_SID': 'rofl',
+        'AUTH_TOKEN': 'lol',
+        'phone_number': '+15558675309'
+    },
 
     'split_long_sms': True
+}
 
-class DATABASE:
-    MYSQL = {
-        'server': '192.168.1.117',
+database = {
+    'mysql': {
+        'server': 'localhost',
         'port': 3306,
         'user': 'tvrobot',
-        'password': 'fuckyeabody', 
-        'schema': 'TvRobot'
+        'password': 'lol', 
+        'schema': 'trvobot'
     }
+}
 
-class TRANSMISSION:
-    'server': 'somehost',
+transmission = {
+    'server': 'localhost',
     'port': 9091,
     'user': 'tvrobot',
     'password': 'lol',
-    'SSH': {
+    'ssh': {
         'port': 22,
         'user': 'tvrobot',
         'password': 'lol',
     }
-
-class SELENIUM:
-    'server': 'somehost',
-    'port': '4444',
-    'timeout': 30,
-    'log_path': 'logs'
+}

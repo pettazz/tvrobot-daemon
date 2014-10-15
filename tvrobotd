@@ -12,14 +12,9 @@ import core.config as config
 from api.server import TVRobotAPI
 from api.server import APIRunner
 
-
-# log path
-if not os.path.exists(config.TVROBOT['DAEMON']['log_path']):
-    os.mkdir(config.TVROBOT['DAEMON']['log_path'])
-
 # working directory
-if not os.path.exists(config.TVROBOT['DAEMON']['working_directory']):
-    os.mkdir(config.TVROBOT['DAEMON']['working_directory'])
+if not os.path.exists(config.tvrobot['daemon']['working_directory']):
+    os.mkdir(config.tvrobot['daemon']['working_directory'])
 
 class TVRobotDaemon():
 
@@ -30,8 +25,8 @@ class TVRobotDaemon():
         except:
             pass 
 
-        self.stdout_path = config.TVROBOT['DAEMON']['log_path'] + 'tvrobotd.log'
-        self.stderr_path = config.TVROBOT['DAEMON']['log_path'] + 'tvrobotd.err.log'
+        self.stdout_path = config.tvrobot['deamon']['log_path'] + 'tvrobotd.log'
+        self.stderr_path = config.tvrobot['deamon']['log_path'] + 'tvrobotd.err.log'
 
         self.pidfile_path = '/var/run/tvrobotd.pid'
 
@@ -120,7 +115,7 @@ class TVRobotDaemon():
         context = daemon.DaemonContext(
             stdout = open(self.stdout_path, 'a'), 
             stderr = open(self.stderr_path, 'a'),  
-            working_directory = config.TVROBOT['DAEMON']['working_directory'],
+            working_directory = config.tvrobot['daemon']['working_directory'],
             signal_map = {
                 signal.SIGTERM: 'end_server'
             }

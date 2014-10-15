@@ -2,3 +2,4 @@ python-daemon==1.6
 tornado==3.2
 setproctitle
 lockfile==0.9.1
+requests==2.4.3
