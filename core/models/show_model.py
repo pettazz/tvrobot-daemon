@@ -15,6 +15,6 @@ class ShowModel(BaseModel):
         'ended' # boolean if series ended
     ]
 
+    TABLE = 'Show'
+
     API_SEARCH = 'http://api.trakt.tv/search/shows.json/%(api_key)s?query=%(name)s&seasons=true'
-
-
