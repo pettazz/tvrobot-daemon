@@ -4,3 +4,4 @@ tornado==3.2
 setproctitle
 lockfile==0.9.1
 requests==2.4.3
+nose==1.2.1
