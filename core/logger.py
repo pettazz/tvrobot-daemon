@@ -14,7 +14,7 @@ def singleton(cls):
 class Logger:
     def __init__(self, logger_name = 'root'):
         if not os.path.exists(config.tvrobot['daemon']['log_path']):
-            os.mkdir(config.tvrobot['daemon']['log_path'])
+            os.mkdirs(config.tvrobot['daemon']['log_path'])
         self.logger_name = logger_name
         self.logger = self.__init_logger(self.logger_name)
 
