@@ -32,18 +32,21 @@ class BaseModel:
     def parse_criteria(cls, criteria):
         result = ''
         for key in criteria:
-            if key.upper() == 'NOT':
-                result += ' NOT ( %s )' % cls.parse_criteria(criteria[key])
-            elif key.upper() in ['AND', 'OR']:
-                result += '( '
-                #parse each value in criteria[key] and stick key in between them
-                innerResults = []
-                for innerKey in criteria[key]:
-                    innerResults.append(cls.parse_criteria({innerKey: criteria[key[innerKey]]}))
-                result += innerResults.join(key.upper())
-                result +=' ) '
+            if type(criteria[key]) == dict:
+                if key.upper() == 'NOT':
+                    result += ' NOT (%s) ' % cls.parse_criteria(criteria[key])
+                elif key.upper() in ['AND', 'OR']:
+                    result += ' ('
+                    #parse each value in criteria[key] and stick key in between them
+                    innerResults = []
+                    for innerKey in criteria[key]:
+                        innerResults.append(cls.parse_criteria({innerKey: criteria[key][innerKey]}))
+                    result += key.upper().join(innerResults)
+                    result += ') '
+                else:
+                    Logger.get_logger(__name__).warn('I\'m sorry, I don\'t speak idiot. Couldn\'t parse operator declaration: %s', key)
             else:
-                result += '%s = %s' % (key, criteria[key])
+                result += ' %s = %s ' % (key, criteria[key])
 
         return result
 
