@@ -96,7 +96,7 @@ class BaseModelTest(unittest.TestCase):
 
     def test_findOne_empty(self):
         result = BaseModel.findOne({'guid': 'notreal'})
-        self.assertIsNone(result)
+        self.assertEqual(result, None)
 
     def test_findAll_empty(self):
         result = BaseModel.findAll({'name': 'notreal'})
