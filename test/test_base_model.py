@@ -12,6 +12,11 @@ class BaseModelTest(unittest.TestCase):
 
     def test_parse_criteria(self):
         data = {
+            'empty': {
+                'criteria': {},
+                'expected': '1'
+            },
+
             'base': {
                 'criteria': {'one': 1},
                 'expected': ' one = 1 '

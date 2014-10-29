@@ -48,6 +48,9 @@ class BaseModel:
             else:
                 result += ' %s = %s ' % (key, criteria[key])
 
+        if result == '':
+            result = '1'
+
         return result
 
 
