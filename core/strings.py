@@ -1,5 +1,5 @@
 STRINGS = {
-    "en_US": {
+    "en-US": {
 
         "api": {
             "error_generic": 'Something went wrong!',
@@ -106,8 +106,12 @@ class StringCategory:
 
 class Stringifier:
 
-    def __init__(self, lang_id = "en_US"):
-        self.lang_id = lang_id
+    def __init__(self, lang_id = None):
+        if STRINGS.get(lang_id) is None:
+            self.lang_id = 'en-US'
+        else:
+          self.lang_id = lang_id
+
         self.categories = {}
 
         for category in STRINGS[self.lang_id].keys():
