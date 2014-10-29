@@ -4,7 +4,7 @@ from core.database import Database
 #import requests
 
 class BaseModel:
-    TABLE = 'BOBBY'
+    TABLE = 'Bobby'
     FIELDS = {
         0: 'guid'
     }
@@ -12,13 +12,23 @@ class BaseModel:
 
     @classmethod
     def findOne(cls, criteria = {}):
-        logr = Logger.get_logger(__name__)
-        row = Database().get_one('SELECT * FROM %s WHERE ')
+        model = cls()
+        row = Database().get_one('SELECT * FROM %s WHERE %s ' % (cls.TABLE, cls.parse_criteria(criteria)), {})
+        if row:
+            model.load(row)
+        else:
+            model = None
+        return model
 
     @classmethod
     def findAll(cls, criteria = {}):
-        logr = Logger.get_logger(__name__)
-        pass
+        rows = Database().get('SELECT * FROM %s WHERE %s ' % (cls.TABLE, cls.parse_criteria(criteria)), {})
+        models = []
+        for row in rows:
+            model = cls()
+            model.load(row)
+            models.append(model)
+        return models
 
     @classmethod
     def search(cls, criteria = {}):
@@ -48,7 +58,10 @@ class BaseModel:
                 else:
                     Logger.get_logger(__name__).warn('I\'m sorry, I don\'t speak idiot. Couldn\'t parse operator declaration: %s', key)
             else:
-                result += ' %s = %s ' % (key, criteria[key])
+                if type(criteria[key]) == str:
+                    result += ' %s = "%s" ' % (key, criteria[key])
+                else:
+                    result += ' %s = %s ' % (key, criteria[key])
 
         if result == '':
             result = '1'

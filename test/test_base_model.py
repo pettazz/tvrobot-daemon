@@ -46,7 +46,6 @@ class BaseModelTest(unittest.TestCase):
                 'Criteria set %s did not match expected:\nexpected:`%s`\nactual:  `%s`' % (dataSet, data[dataSet]['expected'], parsed))
 
     def test_load_dict(self):
-
         BaseModel.FIELDS = {
             0: 'guid',
             1: 'name',
@@ -62,7 +61,6 @@ class BaseModelTest(unittest.TestCase):
             self.assertEqual(getattr(test_model, key), dict_data[key], 'Loaded data does not match data from source')
 
     def test_load_list(self):
-
         BaseModel.FIELDS = {
             0: 'guid',
             1: 'name',
@@ -79,7 +77,6 @@ class BaseModelTest(unittest.TestCase):
         self.assertEqual(test_model.hats, row_data[2], 'Loaded data does not match data from source')
 
     def test_load_ignore_unknown_fields(self):
-
         BaseModel.FIELDS = {
             0: 'guid',
             1: 'name',
@@ -96,3 +93,11 @@ class BaseModelTest(unittest.TestCase):
         self.assertEqual(test_model.hats, dict_data['hats'], 'Loaded data does not match data from source')
         self.assertFalse(hasattr(test_model, 'banana'), 'Loaded an unknown field that we should not have')
         self.assertFalse(hasattr(test_model, 'number'), 'Loaded an unknown field that we should not have')
+
+    def test_findOne_empty(self):
+        result = BaseModel.findOne({'guid': 'notreal'})
+        self.assertIsNone(result)
+
+    def test_findAll_empty(self):
+        result = BaseModel.findAll({'name': 'notreal'})
+        self.assertEqual(result, [])

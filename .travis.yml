@@ -3,5 +3,8 @@ python:
   - "2.7"
   - "2.6"
 install: "pip install -r requirements.pip"
-before_script: cp core/config-test.py core/config.py
+before_script: 
+  - cp core/config-test.py core/config.py
+  - mysql -e 'create database tvrobotd;'
+  - mysql -h 127.0.0.1 -u root tvrobotd < schema-test.sql
 script: nosetests test

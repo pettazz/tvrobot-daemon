@@ -55,9 +55,11 @@ database = {
     'mysql': {
         'server': 'localhost',
         'port': 3306,
-        'user': 'tvrobot',
-        'password': 'lol', 
-        'schema': 'trvobot'
+        'user': 'root',
+        'password': '', 
+        'schema': 'tvrobotd',
+        'retries': 3,
+        'backoff': 10
     }
 }
 
