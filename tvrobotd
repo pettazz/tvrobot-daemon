@@ -13,7 +13,7 @@ from api.server import APIRunner
 
 # working directory
 if not os.path.exists(config.tvrobot['daemon']['working_directory']):
-    os.mkdirs(config.tvrobot['daemon']['working_directory'])
+    os.makedirs(config.tvrobot['daemon']['working_directory'])
 
 class TVRobotDaemon():
 
