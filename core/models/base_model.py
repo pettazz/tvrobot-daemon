@@ -4,8 +4,10 @@ from core.database import Database
 #import requests
 
 class BaseModel:
-    TABLE = ''
-    FIELDS = ['guid']
+    TABLE = 'BOBBY'
+    FIELDS = {
+        0: 'guid'
+    }
 
 
     @classmethod
@@ -55,18 +57,22 @@ class BaseModel:
 
 
 
-    def __init__(self, data = None):
+    def __init__(self):
         self.logr = Logger.get_logger(__name__)
 
-        if data is None:
-            self.create()
-
     def load(self, options):
-        for opt in options.keys():
-            if opt in self.FIELDS:
-                setattr(self, opt, options[opt])
-            else:
-                self.logr.warning('Unrecognized field `%s` not loaded' % opt)
+        if type(options) == dict:
+            for opt in options.keys():
+                if opt in self.FIELDS.values():
+                    setattr(self, opt, options[opt])
+                else:
+                    self.logr.warning('Unrecognized field `%s` not loaded' % opt)
+        elif type(options) == list:
+            for idx in range(0, len(options)):
+                if idx in self.FIELDS.keys():
+                    setattr(self, self.FIELDS[idx], options[idx])
+        else:
+            self.logr.warning('Attempted to load unknown enum/iterable, ignoring')
 
     def save(self):
         pass
