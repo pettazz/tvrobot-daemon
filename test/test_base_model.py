@@ -101,3 +101,47 @@ class BaseModelTest(unittest.TestCase):
     def test_findAll_empty(self):
         result = BaseModel.findAll({'name': 'notreal'})
         self.assertEqual(result, [])
+
+    def test_findOne(self):
+        BaseModel.FIELDS = {
+            0: 'guid',
+            1: 'name',
+            2: 'hats'
+        }
+        result = BaseModel.findOne({'guid': 'a1'})
+
+        self.assertEqual(result.guid, 'a1')
+        self.assertEqual(result.name, 'lol')
+        self.assertTrue(result.hats)
+
+    def test_findAll(self):
+        BaseModel.FIELDS = {
+            0: 'guid',
+            1: 'name',
+            2: 'hats'
+        }
+        results = BaseModel.findAll()
+
+        self.assertEqual(len(results), 2)
+
+        for result in results:
+            if result.guid == 'a1':
+                self.assertEqual(result.name, 'lol')
+                self.assertTrue(result.hats)
+            elif result.guid == 'b2':
+                self.assertEqual(result.name, 'rofl')
+                self.assertFalse(result.hats)
+
+    def test_findAll_criteria(self):
+        BaseModel.FIELDS = {
+            0: 'guid',
+            1: 'name',
+            2: 'hats'
+        }
+        results = BaseModel.findAll({'hats': False})
+
+        self.assertEqual(len(results), 1)
+
+        self.assertEqual(results[0].guid, 'b2')
+        self.assertEqual(results[0].name, 'rofl')
+        self.assertFalse(results[0].hats)

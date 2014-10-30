@@ -80,12 +80,12 @@ class BaseModel:
                     setattr(self, opt, options[opt])
                 else:
                     self.logr.warning('Unrecognized field `%s` not loaded' % opt)
-        elif type(options) == list:
+        elif type(options) in [tuple, list]:
             for idx in range(0, len(options)):
                 if idx in self.FIELDS.keys():
                     setattr(self, self.FIELDS[idx], options[idx])
         else:
-            self.logr.warning('Attempted to load unknown enum/iterable, ignoring')
+            self.logr.warning('Attempted to load unknown enum/iterable, ignoring: `%s`' % options)
 
     def save(self):
         pass
