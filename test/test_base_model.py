@@ -145,3 +145,58 @@ class BaseModelTest(unittest.TestCase):
         self.assertEqual(results[0].guid, 'b2')
         self.assertEqual(results[0].name, 'rofl')
         self.assertFalse(results[0].hats)
+
+    def test_create_empty(self):
+        BaseModel.FIELDS = {
+            0: 'guid',
+            1: 'name',
+            2: 'hats'
+        }
+        model = BaseModel.create()
+
+        self.assertTrue(model._new)
+        self.assertEqual(model.guid, None)
+        self.assertEqual(model.name, None)
+        self.assertEqual(model.hats, None)
+
+    def test_create_from_data(self):
+        BaseModel.FIELDS = {
+            0: 'guid',
+            1: 'name',
+            2: 'hats'
+        }
+        data = {
+            'guid': '123abc',
+            'name': 'banana',
+            'hats': True
+        }
+        model = BaseModel.create(data)
+
+        self.assertTrue(model._new)
+        self.assertEqual(model.guid, data['guid'])
+        self.assertEqual(model.name, data['name'])
+        self.assertEqual(model.hats, data['hats'])
+
+    def test_save(self):
+        BaseModel.FIELDS = {
+            0: 'guid',
+            1: 'name',
+            2: 'hats'
+        }
+        data = {
+            'guid': '123abc',
+            'name': 'banana',
+            'hats': True
+        }
+        model = BaseModel.create(data)
+
+        model.name = 'notabanana'
+        model.hats = False
+
+        model.save()
+
+        loaded_model = BaseModel.findOne({'guid': '123abc'})
+
+        self.assertEqual(model.guid, loaded_model.guid)
+        self.assertEqual(model.name, loaded_model.name)
+        self.assertEqual(model.hats, loaded_model.hats)

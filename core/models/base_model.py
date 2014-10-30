@@ -36,9 +36,14 @@ class BaseModel:
         pass
 
     @classmethod
-    def create(cls, self):
-        logr = Logger.get_logger(__name__)
-        pass
+    def create(cls, data = None):
+        model = cls()
+        model._new = True
+        if data is None:
+            return model
+        else:
+            model.load(data)
+            return model
 
     @classmethod
     def parse_criteria(cls, criteria):
@@ -69,9 +74,21 @@ class BaseModel:
         return result
 
 
-
     def __init__(self):
         self.logr = Logger.get_logger(__name__)
+        self._new = False
+        for fieldidx in self.FIELDS:
+            setattr(self, self.FIELDS[fieldidx], None)
+
+    def __str__(self):
+        return str(self.get_field_values())
+
+    def get_field_values(self):
+        result = {}
+        for fieldidx in self.FIELDS:
+            result[self.FIELDS[fieldidx]] = getattr(self, self.FIELDS[fieldidx])
+
+        return result
 
     def load(self, options):
         if type(options) == dict:
@@ -88,4 +105,31 @@ class BaseModel:
             self.logr.warning('Attempted to load unknown enum/iterable, ignoring: `%s`' % options)
 
     def save(self):
-        pass
+        values = self.get_field_values()
+        if self._new:
+            parsed_keys = []
+            parsed_vals = []
+            for field_name in values:
+                val = values[field_name]
+                if type(values[field_name]) == str:
+                    val = '"%s"' % val
+                else:
+                    val = str(val)
+                parsed_keys.append(field_name)
+                parsed_vals.append(val)
+            data = {
+                'table_name': self.TABLE,
+                'field_list': ', '.join(parsed_keys),
+                'value_list': ', '.join(parsed_vals)
+            }
+            Database().query('INSERT INTO %(table_name)s (%(field_list)s) VALUES (%(value_list)s)' % data)
+            self._new = False
+        else:
+            data = {
+                'table_name': self.TABLE
+            }
+            fields = ''
+            for field_name in values:
+                fields += '%s = %s ' % (data[field_name], values[field_name])
+            data['fields'] = fields
+            Database().query('UPDATE %(table_name)s SET %(fields)s WHERE guid = %(guid)s' % data)
