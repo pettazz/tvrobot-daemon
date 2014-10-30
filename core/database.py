@@ -70,7 +70,7 @@ class Database:
         return retval
 
 
-    def query(self, query, values):
+    def query(self, query, values = {}):
         values = self.__sanitize(values)
         self.logr.info('Executing MySQL query: `%s`' % (query % values))
         cursor = self.__get_conn().cursor()
